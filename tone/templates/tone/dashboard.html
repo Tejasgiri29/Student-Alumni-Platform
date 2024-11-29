@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TONE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .search-container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .profile-card {
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .profile-card:hover {
+            transform: translateY(-5px);
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .user-info {
+            color: white;
+            margin-right: 15px;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Add any additional navigation items here -->
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div class="user-info">
+                        Welcome, {{ request.user.get_full_name }}
+                        {% if user_type %}
+                            ({{ user_type|title }})
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'edit_profile' %}" class="btn btn-outline-light me-2">
+                        <i class="fas fa-user-edit"></i> Edit Profile
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Search Section -->
+    <div class="search-container">
+        <form method="get" class="card p-4 shadow-sm">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="query" class="form-control" placeholder="Search by Name, Year, City, Branch, or Department..." value="{{ query }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="filter_type" class="form-select">
+                        <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All</option>
+                        <option value="student" {% if filter_type == 'student' %}selected{% endif %}>Students</option>
+                        <option value="alumni" {% if filter_type == 'alumni' %}selected{% endif %}>Alumni</option>
+                        <option value="faculty" {% if filter_type == 'faculty' %}selected{% endif %}>Faculty</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div class="container mt-4">
+        <div class="row">
+            {% for type, profile in results %}
+            <div class="col-md-4">
+                <div class="card profile-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ profile.user.get_full_name }}</h5>
+                        <img src="{{ profile.user.profile_picture.url }}" alt="Profile Picture" class="img-fluid rounded-circle mb-2" style="width: 100px; height: 100px;">
+                        <h6 class="card-subtitle mb-2 text-muted">{{ type|title }}</h6>
+                        
+                        {% if type == 'student' %}
+                            <p class="card-text">
+                                Branch: {{ profile.branch }}<br>
+                                Current Year: {{ profile.current_year }}<br>
+                                Expected Graduation Year: {{ profile.expected_graduation_year }}<br>
+                                CGPA: {{ profile.cgpa }}<br>
+                                Interested Areas: {{ profile.interested_areas.all|join:", " }}<br>
+                                LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a><br>
+                                GitHub: <a href="{{ profile.github_profile }}">{{ profile.github_profile }}</a><br>
+                                Resume: <a href="{{ profile.resume_drive_link }}">{{ profile.resume_drive_link }}</a>
+                            </p>
+                        {% elif type == 'alumni' %}
+                            <p class="card-text">
+                                Passing Year: {{ profile.passing_year }}<br>
+                                Branch: {{ profile.branch }}<br>
+                                City: {{ profile.city }}<br>
+                                State: {{ profile.state }}<br>
+                                Employment Status: {{ profile.employment_status }}<br>
+                                Skills: {{ profile.skills.all|join:", " }}<br>
+                                Company: {{ profile.company }}<br>
+                                Job Title: {{ profile.job_title }}<br>
+                                Years of Experience: {{ profile.years_of_experience }}<br>
+                                LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a><br>
+                                Portfolio: <a href="{{ profile.portfolio_url }}">{{ profile.portfolio_url }}</a><br>
+                                Business Name: {{ profile.business_name }}<br>
+                                Business Website: <a href="{{ profile.business_website }}">{{ profile.business_website }}</a><br>
+                                Field of Work: {{ profile.field_of_work.all|join:", " }}
+                            </p>
+                        {% else %}
+                            <p class="card-text">
+                                Department: {{ profile.department }}<br>
+                                Designation: {{ profile.designation }}<br>
+                                Years of Experience: {{ profile.years_of_experience }}<br>
+                                Subjects Taught: {{ profile.subjects_taught.all|join:", " }}<br>
+                                Research Interests: {{ profile.research_interests }}<br>
+                                Publications: {{ profile.publications }}<br>
+                                LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                {% if query %}
+                    <p>No results found for your search.</p>
+                {% else %}
+                    <p>Use the search bar above to find people.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Donation Button -->
+    <div class="container mt-4 text-center">
+        <a href="{% url 'donate' %}" class="btn btn-success">Donate to College</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

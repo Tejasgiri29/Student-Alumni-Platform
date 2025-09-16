@@ -123,8 +123,8 @@
                                 Expected Graduation Year: {{ profile.expected_graduation_year }}<br>
                                 CGPA: {{ profile.cgpa }}<br>
                                 Interested Areas: {{ profile.interested_areas.all|join:", " }}<br>
-                                LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a><br>
-                                GitHub: <a href="{{ profile.github_profile }}">{{ profile.github_profile }}</a><br>
+                                {% if profile.linkedin_profile %}LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a><br>{% endif %}
+                                {% if profile.github_profile %}GitHub: <a href="{{ profile.github_profile }}">{{ profile.github_profile }}</a><br>{% endif %}
                                 Resume: <a href="{{ profile.resume_drive_link }}">{{ profile.resume_drive_link }}</a>
                             </p>
                         {% elif type == 'alumni' %}
@@ -138,10 +138,10 @@
                                 Company: {{ profile.company }}<br>
                                 Job Title: {{ profile.job_title }}<br>
                                 Years of Experience: {{ profile.years_of_experience }}<br>
-                                LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a><br>
-                                Portfolio: <a href="{{ profile.portfolio_url }}">{{ profile.portfolio_url }}</a><br>
+                                {% if profile.linkedin_profile %}LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a><br>{% endif %}
+                                {% if profile.portfolio_url %}Portfolio: <a href="{{ profile.portfolio_url }}">{{ profile.portfolio_url }}</a><br>{% endif %}
                                 Business Name: {{ profile.business_name }}<br>
-                                Business Website: <a href="{{ profile.business_website }}">{{ profile.business_website }}</a><br>
+                                {% if profile.business_website %}Business Website: <a href="{{ profile.business_website }}">{{ profile.business_website }}</a><br>{% endif %}
                                 Field of Work: {{ profile.field_of_work.all|join:", " }}
                             </p>
                         {% else %}
@@ -152,7 +152,7 @@
                                 Subjects Taught: {{ profile.subjects_taught.all|join:", " }}<br>
                                 Research Interests: {{ profile.research_interests }}<br>
                                 Publications: {{ profile.publications }}<br>
-                                LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a>
+                                {% if profile.linkedin_profile %}LinkedIn: <a href="{{ profile.linkedin_profile }}">{{ profile.linkedin_profile }}</a>{% endif %}
                             </p>
                         {% endif %}
                     </div>
